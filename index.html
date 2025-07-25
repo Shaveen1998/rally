@@ -108,34 +108,42 @@
         }
 
         function calculateTime() {
-            const inputDistance = parseFloat(document.getElementById('input-distance').value);
+                const inputDistance = parseFloat(document.getElementById('input-distance').value);
 
-            if (!isNaN(inputDistance) && inputDistance >= 0) {
-                let totalTime = 0;
-                let remainingDistance = inputDistance;
+                if (!isNaN(inputDistance) && inputDistance >= 0) {
+                    let totalTimeSeconds = 0;
 
-                for (let i = 0; i < data.length; i++) {
-                    const { startDistance, endDistance, speed } = data[i];
-                    if (remainingDistance <= 0) {
-                        break;
+                    for (let i = 0; i < data.length; i++) {
+                        const { startDistance, endDistance, speed } = data[i];
+
+                        let travelStart = Math.max(startDistance, 0);
+                        let travelEnd = Math.min(endDistance, inputDistance);
+
+                        if (travelEnd > travelStart) {
+                            const segmentDistance = travelEnd - travelStart;
+                            totalTimeSeconds += (segmentDistance / speed) * 3600; // convert hours to seconds
+                        }
+
+                        if (endDistance >= inputDistance) {
+                            break;
+                        }
                     }
 
-                    if (remainingDistance > startDistance) {
-                        const distanceInRange = Math.min(remainingDistance, endDistance - startDistance);
-                        totalTime += (distanceInRange / speed) * 60; // converting hours to minutes
-                        remainingDistance -= distanceInRange;
-                    }
-                }
+                    if (inputDistance > Math.max(...data.map(d => d.endDistance))) {
+                        document.getElementById('result').textContent = 'Input distance exceeds the total distance range.';
+                    } else {
+                        const hours = Math.floor(totalTimeSeconds / 3600);
+                        const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+                        const seconds = Math.round(totalTimeSeconds % 60);
 
-                if (remainingDistance > 0) {
-                    document.getElementById('result').textContent = 'Input distance exceeds the total distance range.';
+                        document.getElementById('result').textContent =
+                            `Time needed: ${hours}h ${minutes}m ${seconds}s`;
+                    }
                 } else {
-                    document.getElementById('result').textContent = `Time needed: ${totalTime.toFixed(2)} minutes`;
+                    alert('Please enter a valid number for distance.');
                 }
-            } else {
-                alert('Please enter a valid number for distance.');
             }
-        }
+
     </script>
 </body>
 
